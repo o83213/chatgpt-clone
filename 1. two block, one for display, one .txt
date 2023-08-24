@@ -1,0 +1,10 @@
+feature needs:
+1. two block, one for display, one for input
+2. the old result should be display above, only be delete if the page refresh
+
+user story:
+1. user can input the chat into prompt
+2. AI will use the user's prompt to answer question
+3. the history will be keep in memory, and after the page refresh, it will gone(no db need!).
+4. Optional: AI will have the memory of the chat
+5. Optional: The result will be streaming to the UI!
