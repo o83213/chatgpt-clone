@@ -4,27 +4,37 @@ import Chat from "@/models/chat";
 
 async function POST(req: NextRequest) {
   const { user } = await req.json();
-  console.log(user);
+
   await connectMongoDB();
-  await Chat.create({
+
+  const chat = await Chat.create({
     userEmail: user.email,
     message: [],
   });
 
-  return NextResponse.json(
-    {
-      message: "Chat created successfully!",
-    },
-    { status: 201 }
-  );
+  return NextResponse.json(chat, { status: 201 });
 }
 
 async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const userEmail = searchParams.get("email");
+
   await connectMongoDB();
+
   const chats = await Chat.find({ userEmail }).sort({ createdAt: "asc" });
+
   return NextResponse.json(chats, { status: 200 });
 }
 
-export { POST, GET };
+async function DELETE(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  await connectMongoDB();
+
+  const chat = await Chat.findByIdAndDelete(id);
+
+  return NextResponse.json(chat, { status: 200 });
+}
+
+export { POST, GET, DELETE };

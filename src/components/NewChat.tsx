@@ -1,27 +1,15 @@
 "use client";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
-function NewChat() {
-  const router = useRouter();
-  const { data: session } = useSession();
+type Props = {
+  createChatMutation: () => Promise<void>;
+};
 
-  // async function createChat() {
-  //   const doc = await addDoc(
-  //     collection(db, "users", session?.user?.email!, "chats"),
-  //     {
-  //       userId: session?.user?.email!,
-  //       createdAt: serverTimestamp(),
-  //     }
-  //   );
-  //   router.push(`/chat/${doc.id}`);
-  // }
-
+function NewChat({ createChatMutation }: Props) {
   return (
     <div
       onClick={() => {
-        // createChat();
+        createChatMutation();
       }}
       className="border-gray-700 border chatRow"
     >
