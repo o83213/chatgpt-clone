@@ -5,21 +5,19 @@ import Chat from "@/models/chat";
 async function POST(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const chatId = searchParams.get("chatId");
-  const { text, user } = await req.json();
-  console.log(text, user);
+  console.log("Server data", chatId);
+  const { text, author } = await req.json();
+  console.log(text, author);
   await connectMongoDB();
-  await Chat.findOneAndUpdate(
+  const updatedChat = await Chat.findOneAndUpdate(
     {
       _id: chatId,
     },
     {
       $push: {
-        message: {
+        messages: {
           text,
-          author: {
-            name: user.name,
-            avatar: user.avatar,
-          },
+          author,
         },
       },
     }
@@ -33,12 +31,13 @@ async function POST(req: NextRequest) {
   );
 }
 
+// Get chat with id
 async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const chatId = searchParams.get("chatId");
   await connectMongoDB();
-  const chats = await Chat.find({ _id: chatId }).sort({ updatedAt: -1 });
-  return NextResponse.json(chats, { status: 200 });
+  const chat = await Chat.findOne({ _id: chatId }).sort({ updatedAt: -1 });
+  return NextResponse.json(chat, { status: 200 });
 }
 
 export { POST, GET };

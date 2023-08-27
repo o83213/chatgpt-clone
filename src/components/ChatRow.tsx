@@ -23,7 +23,11 @@ function ChatRow({ id, chat, deleteChatMutation }: Props) {
       setActive(false);
     }
   }, [pathname]);
-  const { message } = chat;
+  const { messages } = chat;
+  console.log("messages", messages);
+  const userQuestion = messages?.filter(
+    (messages) => messages?.author.name !== "ChatGPT"
+  );
   return (
     <Link
       href={`/chat/${id}`}
@@ -31,7 +35,7 @@ function ChatRow({ id, chat, deleteChatMutation }: Props) {
     >
       <ChatBubbleLeftIcon className="h-5 w-5" />
       <p className="flex-1 hidden md:inline-flex truncate">
-        {message?.[message.length - 1]?.text || "New Chat"}
+        {userQuestion?.[userQuestion.length - 1]?.text || "New Chat"}
       </p>
       <TrashIcon
         className="h-5 w-5 text-gray-700 hover:text-red-700"

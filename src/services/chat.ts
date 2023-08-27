@@ -49,7 +49,7 @@ type Message = {
 export type Chat = {
   _id: string;
   userEmail: string;
-  message: Message[];
+  messages: Message[];
   createdAt: string;
   updatedAt: string;
 };

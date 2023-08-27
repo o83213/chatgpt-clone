@@ -2,14 +2,22 @@
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useState, FormEvent } from "react";
 import { useSession } from "next-auth/react";
+import { toast } from "react-hot-toast";
+import ModelSelection from "./ModelSelection";
+import useSWR from "swr";
 
 type Props = {
   chatId: string;
+  createMessageMutation: (message: Message) => Promise<void>;
 };
 
-function ChatInput({ chatId }: Props) {
+function ChatInput({ chatId, createMessageMutation }: Props) {
   const [prompt, setPrompt] = useState<string>("");
   const { data: session } = useSession();
+
+  const { data: model } = useSWR("model", {
+    fallbackData: "gpt-3.5-turbo",
+  });
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -17,24 +25,40 @@ function ChatInput({ chatId }: Props) {
 
     const input = prompt.trim();
     setPrompt("");
-
-    const message: Message = {
+    const newMessage: Message = {
       text: input,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
       author: {
-        _id: session?.user?.email!,
+        email: session?.user?.email!,
         name: session?.user?.name!,
         avatar:
           session?.user?.image! ||
           `https://ui-avatars.com/api?name=${session?.user?.email!}`,
       },
     };
+
+    await createMessageMutation(newMessage);
+
+    // Toast notification to say Loading
+    const nitification = toast.loading("AI is thinking...");
+    const data = await fetch("/api/askQuestion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: input, chatId, model }),
+    }).then((res) => {
+      // Toast notification to say success
+      console.log(res);
+      return res.json();
+    });
+    const { message } = data;
+    await createMessageMutation(message);
+    toast.success("AI has responded!", { id: nitification });
   };
 
   return (
     <div className="bg-gray-700/50 text-gray-400 rounded-lg text-sm">
-      <form onSubmit={(e) => sendMessage} className="p-5 space-x-5 flex">
+      <form onSubmit={sendMessage} className="p-5 space-x-5 flex">
         <input
           className="bg-transparent flex-1 outline-none disabled:cursor-not-allowed disabled:text-gray-300"
           disabled={!session}
@@ -53,7 +77,9 @@ function ChatInput({ chatId }: Props) {
           <PaperAirplaneIcon className="h-4 w-4 -rotate-45" />
         </button>
       </form>
-      <div>{/**ModelSelection */}</div>
+      <div className="md:hidden">
+        <ModelSelection />
+      </div>
     </div>
   );
 }

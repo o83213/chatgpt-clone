@@ -9,7 +9,7 @@ async function POST(req: NextRequest) {
 
   const chat = await Chat.create({
     userEmail: user.email,
-    message: [],
+    messages: [],
   });
 
   return NextResponse.json(chat, { status: 201 });

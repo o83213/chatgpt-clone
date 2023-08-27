@@ -1,14 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
-const authorSchema = new Schema({
-  name: String,
-  avatar: String,
-});
-
 const messageSchema = new Schema(
   {
     text: String,
-    author: authorSchema,
+    author: {
+      email: String,
+      name: String,
+      avatar: String,
+    },
   },
   {
     timestamps: true,
@@ -18,7 +17,7 @@ const messageSchema = new Schema(
 const chatScehma = new Schema(
   {
     userEmail: String,
-    message: [messageSchema],
+    messages: [messageSchema],
   },
   { timestamps: true }
 );

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import NewChat from "@components/NewChat";
 import { useSession, signOut } from "next-auth/react";
@@ -10,6 +11,7 @@ import {
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import ChatRow from "@components/ChatRow";
+import ModelSelection from "./ModelSelection";
 
 function SideBar() {
   const { data: session } = useSession();
@@ -38,6 +40,7 @@ function SideBar() {
   async function deleteChatMutation(id: string) {
     try {
       const deletedChat = await deleteChat({ id });
+      console.log("deletedChat", deletedChat);
       mutate();
       router.replace("/");
     } catch (err) {
@@ -51,15 +54,24 @@ function SideBar() {
         <div>
           {/**New Chat */}
           <NewChat createChatMutation={createChatMutation} />
-          <div>{/*ModelSelection*/}</div>
-          {chats?.map((chat: any) => (
-            <ChatRow
-              key={chat._id}
-              id={chat._id}
-              chat={chat}
-              deleteChatMutation={deleteChatMutation}
-            />
-          ))}
+          <div className="hidden md:inline">
+            <ModelSelection />
+          </div>
+          <div className="flex flex-col space-y-2 my-2">
+            {isLoading && (
+              <div className="animate-pulse text-center text-white">
+                <p>Loading Chats...</p>
+              </div>
+            )}
+            {chats?.map((chat: any) => (
+              <ChatRow
+                key={chat._id}
+                id={chat._id}
+                chat={chat}
+                deleteChatMutation={deleteChatMutation}
+              />
+            ))}
+          </div>
           {/**Map through the ChatRows */}
         </div>
       </div>
