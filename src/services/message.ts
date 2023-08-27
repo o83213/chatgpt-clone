@@ -13,13 +13,11 @@ async function updateChatMessageById({
   chatId: string;
   message: Message;
 }): Promise<Message> {
-  console.log("updateChatMessageById", chatId, message);
   const res = await messageApi.post(messageUrlEndPoint, message, {
     params: {
       chatId,
     },
   });
-  console.log("updateChatMessageById", res.data);
   return res.data;
 }
 

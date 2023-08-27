@@ -21,20 +21,27 @@ async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-
-  const answer = await queryGPT(prompt, chatId, model);
-  console.log("ai answer", answer);
-
-  const aiMessage: Message = {
-    text: (answer as string) || "Sorry, ChatGPT doesn't understand that yet.",
-    author: {
-      email: "https://api.openai.com",
-      avatar: "https://links.papareact.com/89k",
-      name: "ChatGPT",
-    },
-  };
-
-  return NextResponse.json({ message: aiMessage }, { status: 200 });
+  try {
+    const answer = await queryGPT(prompt, chatId, model);
+    const aiMessage: Message = {
+      text: (answer as string) || "Sorry, ChatGPT doesn't understand that yet.",
+      author: {
+        email: "https://api.openai.com",
+        avatar: "https://links.papareact.com/89k",
+        name: "ChatGPT",
+      },
+    };
+    return NextResponse.json({ message: aiMessage }, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json(
+      {
+        message: `ChatGPT was unable to respond to your prompt. (Error: ${
+          err?.message || "Unknown error"
+        })`,
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export { POST };

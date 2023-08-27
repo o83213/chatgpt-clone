@@ -35,25 +35,31 @@ function ChatInput({ chatId, createMessageMutation }: Props) {
           `https://ui-avatars.com/api?name=${session?.user?.email!}`,
       },
     };
+    const notification = toast.loading("AI is thinking...");
+    try {
+      await createMessageMutation(newMessage);
+      // Toast notification to say Loading
 
-    await createMessageMutation(newMessage);
-
-    // Toast notification to say Loading
-    const nitification = toast.loading("AI is thinking...");
-    const data = await fetch("/api/askQuestion", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt: input, chatId, model }),
-    }).then((res) => {
-      // Toast notification to say success
-      console.log(res);
-      return res.json();
-    });
-    const { message } = data;
-    await createMessageMutation(message);
-    toast.success("AI has responded!", { id: nitification });
+      const data = await fetch("/api/askQuestion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt: input, chatId, model }),
+      }).then((res) => {
+        // Toast notification to say success
+        return res.json();
+      });
+      const { message } = data;
+      await createMessageMutation(message);
+      toast.success("AI has responded!", { id: notification });
+    } catch (err) {
+      console.log(err);
+      toast.error("AI has failed to respond!", {
+        id: notification,
+        duration: 3000,
+      });
+    }
   };
 
   return (

@@ -9,7 +9,6 @@ type Props = {
 };
 
 function Chat({ chat }: Props) {
-  console.log("chat", chat);
   const messages = chat?.messages || [];
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden">

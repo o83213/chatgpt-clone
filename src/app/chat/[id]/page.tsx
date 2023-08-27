@@ -23,7 +23,6 @@ function ChatPage({ params: { id } }: Props) {
   );
 
   async function createMessageMutation(message: Message) {
-    console.log("message", message);
     try {
       await updateChatMessageById({ chatId: id, message });
       mutate();

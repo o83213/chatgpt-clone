@@ -24,7 +24,6 @@ function ChatRow({ id, chat, deleteChatMutation }: Props) {
     }
   }, [pathname]);
   const { messages } = chat;
-  console.log("messages", messages);
   const userQuestion = messages?.filter(
     (messages) => messages?.author.name !== "ChatGPT"
   );

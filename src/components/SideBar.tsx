@@ -40,7 +40,6 @@ function SideBar() {
   async function deleteChatMutation(id: string) {
     try {
       const deletedChat = await deleteChat({ id });
-      console.log("deletedChat", deletedChat);
       mutate();
       router.replace("/");
     } catch (err) {

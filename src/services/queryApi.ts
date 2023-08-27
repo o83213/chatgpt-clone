@@ -3,7 +3,6 @@ import openai from "./chatgpt";
 // async function query(prompt: string, chatId: string, model: string) {
 // TODO chatId can be use as a memory to store the conversation
 async function queryGPT(prompt: string, chatId: string, model: string) {
-  console.log("queryGPT", prompt, chatId, model);
   const answer = await openai.chat.completions
     .create({
       model,
