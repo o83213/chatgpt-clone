@@ -8,7 +8,6 @@ import {
   updateChatMessageById,
   messageUrlEndPoint as cacheKey,
 } from "@services/message";
-// import {chatUrlEndPoint as cacheKey} from "@services/chat";
 
 type Props = {
   params: {
@@ -18,13 +17,9 @@ type Props = {
 
 function ChatPage({ params: { id } }: Props) {
   const { data: session } = useSession();
-  const {
-    isLoading,
-    error,
-    data: chat,
-    mutate,
-  } = useSWR(session ? [cacheKey, id] : null, ([cacheKey, id]) =>
-    getChatById({ chatId: id })
+  const { data: chat, mutate } = useSWR(
+    session ? [cacheKey, id] : null,
+    ([cacheKey, id]) => getChatById({ chatId: id })
   );
 
   async function createMessageMutation(message: Message) {
