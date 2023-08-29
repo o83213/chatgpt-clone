@@ -28,4 +28,3 @@ To learn more about OpenAI and Langchang, take a look at the following resources
 - [openai-node Documentation](https://github.com/openai/openai-node) - learn about Openai API on Node.
 - [LangChain](https://js.langchain.com/docs) - learn about LangChain API on Node.
 
-## Deploy on Vercel
