@@ -8,6 +8,7 @@ import {
   updateChatMessageById,
   messageUrlEndPoint as cacheKey,
 } from "@services/message";
+import { useState } from "react";
 
 type Props = {
   params: {
@@ -17,6 +18,7 @@ type Props = {
 
 function ChatPage({ params: { id } }: Props) {
   const { data: session } = useSession();
+  const [streamedAnswer, setStreamedAnswer] = useState<string>("");
   const { data: chat, mutate } = useSWR(
     session ? [cacheKey, id] : null,
     ([cacheKey, id]) => getChatById({ chatId: id })
@@ -33,8 +35,12 @@ function ChatPage({ params: { id } }: Props) {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <Chat chatId={id} chat={chat} />
-      <ChatInput chatId={id} createMessageMutation={createMessageMutation} />
+      <Chat chatId={id} chat={chat} streamedAnswer={streamedAnswer} />
+      <ChatInput
+        chatId={id}
+        createMessageMutation={createMessageMutation}
+        setStreamedAnswer={setStreamedAnswer}
+      />
     </div>
   );
 }

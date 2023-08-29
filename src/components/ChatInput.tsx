@@ -1,6 +1,6 @@
 "use client";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, Dispatch, SetStateAction } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import ModelSelection from "./ModelSelection";
@@ -9,9 +9,14 @@ import useSWR from "swr";
 type Props = {
   chatId: string;
   createMessageMutation: (message: Message) => Promise<void>;
+  setStreamedAnswer: Dispatch<SetStateAction<string>>;
 };
 
-function ChatInput({ chatId, createMessageMutation }: Props) {
+function ChatInput({
+  chatId,
+  createMessageMutation,
+  setStreamedAnswer,
+}: Props) {
   const [prompt, setPrompt] = useState<string>("");
   const { data: session } = useSession();
 
@@ -25,7 +30,7 @@ function ChatInput({ chatId, createMessageMutation }: Props) {
 
     const input = prompt.trim();
     setPrompt("");
-    const newMessage: Message = {
+    const userMessage: Message = {
       text: input,
       author: {
         email: session?.user?.email!,
@@ -37,22 +42,56 @@ function ChatInput({ chatId, createMessageMutation }: Props) {
     };
     const notification = toast.loading("AI is thinking...");
     try {
-      await createMessageMutation(newMessage);
+      await createMessageMutation(userMessage);
       // Toast notification to say Loading
-
-      const data = await fetch("/api/askQuestion", {
+      // const data = await fetch("/api/askQuestion", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ prompt: input, chatId, model }),
+      // }      )
+      // lanchain model
+      const response = await fetch("/api/langchang", {
         method: "POST",
+        body: JSON.stringify({
+          prompt: input,
+        }),
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: input, chatId, model }),
-      }).then((res) => {
-        // Toast notification to say success
-        return res.json();
       });
-      const { message } = data;
-      await createMessageMutation(message);
       toast.success("AI has responded!", { id: notification });
+      // Toast notification to say success
+      // return res.json();
+      const reader = response.body!.getReader();
+      let responseText = "";
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        const text = new TextDecoder().decode(value);
+        responseText = responseText + text;
+        setStreamedAnswer((prevData) => {
+          console.log(prevData + text);
+          return prevData + text;
+        });
+      }
+      const aiResponseMessage = {
+        text: responseText,
+        author: {
+          email: "https://api.openai.com",
+          avatar: "https://links.papareact.com/89k",
+          name: "ChatGPT",
+        },
+      };
+      console.log(aiResponseMessage);
+      await createMessageMutation(aiResponseMessage);
+      setStreamedAnswer("");
+      // const { message } = data;
     } catch (err) {
       console.log(err);
       toast.error("AI has failed to respond!", {

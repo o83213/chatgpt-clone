@@ -5,10 +5,11 @@ import { ArrowDownCircleIcon } from "@heroicons/react/24/solid";
 
 type Props = {
   chatId: string;
+  streamedAnswer: string;
   chat?: Chat;
 };
 
-function Chat({ chat }: Props) {
+function Chat({ chat, streamedAnswer }: Props) {
   const messages = chat?.messages || [];
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -29,6 +30,18 @@ function Chat({ chat }: Props) {
       {messages.map((message) => {
         return <Message key={message?._id} message={message} />;
       })}
+      {streamedAnswer.trim() !== "" && (
+        <Message
+          message={{
+            text: streamedAnswer,
+            author: {
+              email: "https://api.openai.com",
+              avatar: "https://links.papareact.com/89k",
+              name: "ChatGPT",
+            },
+          }}
+        />
+      )}
     </div>
   );
 }
