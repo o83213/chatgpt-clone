@@ -43,27 +43,20 @@ function ChatInput({
     const notification = toast.loading("AI is thinking...");
     try {
       await createMessageMutation(userMessage);
-      // Toast notification to say Loading
-      // const data = await fetch("/api/askQuestion", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ prompt: input, chatId, model }),
-      // }      )
       // lanchain model
-      const response = await fetch("/api/langchang", {
+      const response = await fetch("/api/askQuestion", {
         method: "POST",
         body: JSON.stringify({
           prompt: input,
+          openAiModel: model,
         }),
         headers: {
           "Content-Type": "application/json",
         },
       });
+
       toast.success("AI has responded!", { id: notification });
-      // Toast notification to say success
-      // return res.json();
+
       const reader = response.body!.getReader();
       let responseText = "";
       while (true) {
@@ -76,7 +69,6 @@ function ChatInput({
         const text = new TextDecoder().decode(value);
         responseText = responseText + text;
         setStreamedAnswer((prevData) => {
-          console.log(prevData + text);
           return prevData + text;
         });
       }
@@ -88,10 +80,8 @@ function ChatInput({
           name: "ChatGPT",
         },
       };
-      console.log(aiResponseMessage);
       await createMessageMutation(aiResponseMessage);
       setStreamedAnswer("");
-      // const { message } = data;
     } catch (err) {
       console.log(err);
       toast.error("AI has failed to respond!", {

@@ -22,7 +22,7 @@ function ChatRow({ id, chat, deleteChatMutation }: Props) {
     } else {
       setActive(false);
     }
-  }, [pathname]);
+  }, [pathname, id]);
   const { messages } = chat;
   const userQuestion = messages?.filter(
     (messages) => messages?.author.name !== "ChatGPT"
@@ -33,7 +33,7 @@ function ChatRow({ id, chat, deleteChatMutation }: Props) {
       className={`chatRow justify-center ${active && "bg-gray-700/50"}`}
     >
       <ChatBubbleLeftIcon className="h-5 w-5" />
-      <p className="flex-1 hidden md:inline-flex truncate">
+      <p className="flex-1 line-clamp-1">
         {userQuestion?.[userQuestion.length - 1]?.text || "New Chat"}
       </p>
       <TrashIcon

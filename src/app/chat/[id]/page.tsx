@@ -34,7 +34,7 @@ function ChatPage({ params: { id } }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-40px)] md:h-screen overflow-hidden">
       <Chat chatId={id} chat={chat} streamedAnswer={streamedAnswer} />
       <ChatInput
         chatId={id}

@@ -12,7 +12,7 @@ type Props = {
 function Chat({ chat, streamedAnswer }: Props) {
   const messages = chat?.messages || [];
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden">
+    <div className="flex-1 overflow-x-hidden">
       {chat ? (
         messages?.length === 0 && (
           <>

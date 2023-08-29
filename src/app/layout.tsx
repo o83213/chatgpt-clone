@@ -3,9 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import SideBar from "@/components/SideBar";
+import MobileSideBar from "@/components/MobileSideBar";
 import AuthProvider from "@/context/AuthProvider";
-import { getServerSession } from "next-auth/next";
-import Login from "@/components/Login";
 import ClientToaster from "@/components/ClientToaster";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,11 +21,16 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`flex ${inter.className}`}>
+      <body
+        className={`min-h-screen overflow-y-auto overflow-x-hidden relative flex flex-col md:flex-row ${inter.className}`}
+      >
         <AuthProvider>
-          <div className="bg-[#202123] max-w-xs h-screen overflow-y-auto md:min-w-[20rem]">
+          <div className="bg-[#202123] hidden md:block h-screen overflow-y-auto max-w-[33%] lg:min-w-[20rem]">
             {/* SideBar */}
             <SideBar />
+          </div>
+          <div className="sticky top-0 bg-[#202123] p-1 md:hidden h-10 z-10">
+            <MobileSideBar />
           </div>
           <ClientToaster />
           <main className="bg-[#343541] flex-1">{children}</main>

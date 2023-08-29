@@ -48,7 +48,7 @@ function SideBar() {
   }
 
   return (
-    <div className="p-2 flex flex-col h-screen">
+    <div className="p-2 bg-[#202123]/50 flex flex-col h-full">
       <div className="flex-1 relative">
         <div>
           {/**New Chat */}
@@ -75,12 +75,17 @@ function SideBar() {
         </div>
       </div>
       {session && (
-        <img
-          className="h-12 w-12 rounded-full cursor-pointer mx-auto mb-2 hover:opacity-50"
-          src={session.user?.image || "/default-avatar.jpg"}
-          alt="user avatar"
+        <button
+          className="flex items-center cursor-pointer mx-auto mb-2 gap-3 hover:opacity-30 transition-all duration-300"
           onClick={() => signOut()}
-        ></img>
+        >
+          <img
+            className="h-12 w-12 rounded-full "
+            src={session.user?.image || "/default-avatar.jpg"}
+            alt="user avatar"
+          ></img>
+          <span className="text-white text-lg font-bold">Logout</span>
+        </button>
       )}
     </div>
   );
