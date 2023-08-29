@@ -1,8 +1,9 @@
 "use client";
 import useSWR from "swr";
 import Select from "react-select";
+import axios from "axios";
 
-const fetchModels = () => fetch("/api/getEngines").then((res) => res.json());
+const fetchModels = () => axios.get("/api/getEngines").then((res) => res.data);
 
 function ModelSelection() {
   const { data: models, isLoading, error } = useSWR("models", fetchModels);

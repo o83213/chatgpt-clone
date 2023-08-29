@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import ModelSelection from "./ModelSelection";
 import useSWR from "swr";
+import axios from "axios";
 
 type Props = {
   chatId: string;
@@ -43,7 +44,7 @@ function ChatInput({
     const notification = toast.loading("AI is thinking...");
     try {
       await createMessageMutation(userMessage);
-      // lanchain model
+
       const response = await fetch("/api/askQuestion", {
         method: "POST",
         body: JSON.stringify({
