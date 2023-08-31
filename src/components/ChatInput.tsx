@@ -11,12 +11,14 @@ type Props = {
   chatId: string;
   createMessageMutation: (message: Message) => Promise<void>;
   setStreamedAnswer: Dispatch<SetStateAction<string>>;
+  chat?: Chat;
 };
 
 function ChatInput({
   chatId,
   createMessageMutation,
   setStreamedAnswer,
+  chat,
 }: Props) {
   const [prompt, setPrompt] = useState<string>("");
   const { data: session } = useSession();
@@ -43,13 +45,28 @@ function ChatInput({
     };
     const notification = toast.loading("AI is thinking...");
     try {
-      await createMessageMutation(userMessage);
+      // const [_, aiResponse] = await Promise.all([
+      //   createMessageMutation(userMessage),
+      //   fetch("/api/askQuestion", {
+      //     method: "POST",
+      //     body: JSON.stringify({
+      //       prompt: input,
+      //       openAiModel: model,
+      //       chat,
+      //     }),
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }),
+      // ]);
+      // await createMessageMutation(userMessage);
 
       const response = await fetch("/api/askQuestion", {
         method: "POST",
         body: JSON.stringify({
           prompt: input,
           openAiModel: model,
+          chat,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -57,6 +74,10 @@ function ChatInput({
       });
 
       toast.success("AI has responded!", { id: notification });
+
+      // console.log("aiResponse", aiResponse);
+      // const data = await aiResponse.json();
+      // console.log("data", data);
 
       const reader = response.body!.getReader();
       let responseText = "";
@@ -69,20 +90,21 @@ function ChatInput({
 
         const text = new TextDecoder().decode(value);
         responseText = responseText + text;
+        console.log("responseText", responseText);
         setStreamedAnswer((prevData) => {
           return prevData + text;
         });
       }
-      const aiResponseMessage = {
-        text: responseText,
-        author: {
-          email: "https://api.openai.com",
-          avatar: "https://links.papareact.com/89k",
-          name: "ChatGPT",
-        },
-      };
-      await createMessageMutation(aiResponseMessage);
-      setStreamedAnswer("");
+      // const aiResponseMessage = {
+      //   // text: responseText,
+      //   text: data.answer,
+      //   author: {
+      //     email: "https://api.openai.com",
+      //     avatar: "https://links.papareact.com/89k",
+      //     name: "ChatGPT",
+      //   },
+      // };
+      // await createMessageMutation(aiResponseMessage);
     } catch (err) {
       console.log(err);
       toast.error("AI has failed to respond!", {
