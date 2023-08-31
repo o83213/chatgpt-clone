@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import ModelSelection from "./ModelSelection";
 import useSWR from "swr";
 import axios from "axios";
+import { runGpt } from "@services/chatgpt";
 
 type Props = {
   chatId: string;
@@ -61,7 +62,7 @@ function ChatInput({
       // ]);
       // await createMessageMutation(userMessage);
 
-      const response = await fetch("/api/askQuestion", {
+      const aiResponse = await fetch("/api/askQuestion", {
         method: "POST",
         body: JSON.stringify({
           prompt: input,
@@ -73,28 +74,36 @@ function ChatInput({
         },
       });
 
+      console.log("aiResponse", aiResponse);
+
+      // const aiResponse = await runGpt(input, model, chat!);
+
+      // for await (const chunk of aiResponse) {
+      //   const message = chunk.choices[0].delta.content;
+      //   console.log("message", message);
+      // }
       toast.success("AI has responded!", { id: notification });
 
-      // console.log("aiResponse", aiResponse);
-      // const data = await aiResponse.json();
-      // console.log("data", data);
+      // start from here
 
-      const reader = response.body!.getReader();
-      let responseText = "";
-      while (true) {
-        const { done, value } = await reader.read();
+      // const reader = aiResponse.body!.getReader();
+      // let responseText = "";
+      // while (true) {
+      //   const { done, value } = await reader.read();
 
-        if (done) {
-          break;
-        }
+      //   console.log("value", value);
+      //   console.log("done", done);
+      //   if (done) {
+      //     break;
+      //   }
 
-        const text = new TextDecoder().decode(value);
-        responseText = responseText + text;
-        console.log("responseText", responseText);
-        setStreamedAnswer((prevData) => {
-          return prevData + text;
-        });
-      }
+      //   const text = new TextDecoder().decode(value);
+      //   responseText = responseText + text;
+      //   console.log("responseText", responseText);
+      //   // setStreamedAnswer((prevData) => {
+      //   //   return prevData + text;
+      //   // });
+      // }
       // const aiResponseMessage = {
       //   // text: responseText,
       //   text: data.answer,

@@ -47,16 +47,16 @@ export async function runLLMChain(
 
   console.log("history", history);
 
-  const chain = new ConversationChain({
-    llm: model,
-    memory: new BufferMemory({ chatHistory: history }),
-  });
+  // const chain = new ConversationChain({
+  //   llm: model,
+  //   memory: new BufferMemory({ chatHistory: history }),
+  // });
 
   // const res = await chain.call({ input: prompt });
   // console.log("res", res);
-  // model.call([new HumanMessage(prompt)]);
+  model.call([...pastMessages, new HumanMessage(prompt)]);
 
-  chain.call({ input: prompt });
+  // chain.call({ input: prompt });
 
   return stream.readable;
 }
