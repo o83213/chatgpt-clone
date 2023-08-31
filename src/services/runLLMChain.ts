@@ -16,9 +16,10 @@ export async function runLLMChain(
   const model = new ChatOpenAI({
     temperature: 0.9,
     modelName: openAiModel,
-    // streaming: true,
+    streaming: true,
     openAIApiKey: process.env.OPENAI_KEY,
     timeout: 20000,
+    maxTokens: 400,
     callbacks: [
       {
         async handleLLMNewToken(token) {
@@ -34,29 +35,18 @@ export async function runLLMChain(
   });
 
   const { messages } = chat;
-  console.log("messages", messages);
-  const pastMessages = messages.map((message) => {
-    if (message.author.name === "ChatGPT") {
-      return new AIMessage(message.text);
-    } else {
-      return new HumanMessage(message.text);
-    }
-  });
 
-  const history = new ChatMessageHistory(pastMessages);
+  const pastMessages = messages
+    .map((message) => {
+      if (message.author.name === "ChatGPT") {
+        return new AIMessage(message.text);
+      } else {
+        return new HumanMessage(message.text);
+      }
+    })
+    .slice(-10);
 
-  console.log("history", history);
-
-  // const chain = new ConversationChain({
-  //   llm: model,
-  //   memory: new BufferMemory({ chatHistory: history }),
-  // });
-
-  // const res = await chain.call({ input: prompt });
-  // console.log("res", res);
   model.call([...pastMessages, new HumanMessage(prompt)]);
-
-  // chain.call({ input: prompt });
 
   return stream.readable;
 }

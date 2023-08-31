@@ -1,7 +1,8 @@
 "use client";
-import { useSession } from "next-auth/react";
+import { useRef, useEffect } from "react";
 import Message from "@components/Message";
 import { ArrowDownCircleIcon } from "@heroicons/react/24/solid";
+import { useInViewport } from "@hooks/useInViewport";
 
 type Props = {
   chatId: string;
@@ -10,6 +11,19 @@ type Props = {
 };
 
 function Chat({ chat, streamedAnswer }: Props) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inViewport = useInViewport(scrollRef);
+  useEffect(() => {
+    let time: any;
+    if (!inViewport) {
+      time = setTimeout(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 20);
+    }
+    return () => {
+      clearTimeout(time);
+    };
+  }, [inViewport]);
   const messages = chat?.messages || [];
   return (
     <div className="flex-1 overflow-x-hidden">
@@ -42,6 +56,7 @@ function Chat({ chat, streamedAnswer }: Props) {
           }}
         />
       )}
+      <div ref={scrollRef}></div>
     </div>
   );
 }

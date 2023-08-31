@@ -5,8 +5,6 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import ModelSelection from "./ModelSelection";
 import useSWR from "swr";
-import axios from "axios";
-import { runGpt } from "@services/chatgpt";
 
 type Props = {
   chatId: string;
@@ -46,74 +44,48 @@ function ChatInput({
     };
     const notification = toast.loading("AI is thinking...");
     try {
-      // const [_, aiResponse] = await Promise.all([
-      //   createMessageMutation(userMessage),
-      //   fetch("/api/askQuestion", {
-      //     method: "POST",
-      //     body: JSON.stringify({
-      //       prompt: input,
-      //       openAiModel: model,
-      //       chat,
-      //     }),
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   }),
-      // ]);
-      // await createMessageMutation(userMessage);
-
-      const aiResponse = await fetch("/api/askQuestion", {
-        method: "POST",
-        body: JSON.stringify({
-          prompt: input,
-          openAiModel: model,
-          chat,
+      setStreamedAnswer("");
+      const [_, aiResponse] = await Promise.all([
+        createMessageMutation(userMessage),
+        fetch("/api/askQuestion", {
+          method: "POST",
+          body: JSON.stringify({
+            prompt: input,
+            openAiModel: model,
+            chat,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      ]);
 
-      console.log("aiResponse", aiResponse);
-
-      // const aiResponse = await runGpt(input, model, chat!);
-
-      // for await (const chunk of aiResponse) {
-      //   const message = chunk.choices[0].delta.content;
-      //   console.log("message", message);
-      // }
       toast.success("AI has responded!", { id: notification });
-
       // start from here
+      const reader = aiResponse.body!.getReader();
+      let responseText = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
 
-      // const reader = aiResponse.body!.getReader();
-      // let responseText = "";
-      // while (true) {
-      //   const { done, value } = await reader.read();
+        const text = new TextDecoder().decode(value);
+        responseText = responseText + text;
+        setStreamedAnswer((prevData) => {
+          return prevData + text;
+        });
+      }
 
-      //   console.log("value", value);
-      //   console.log("done", done);
-      //   if (done) {
-      //     break;
-      //   }
-
-      //   const text = new TextDecoder().decode(value);
-      //   responseText = responseText + text;
-      //   console.log("responseText", responseText);
-      //   // setStreamedAnswer((prevData) => {
-      //   //   return prevData + text;
-      //   // });
-      // }
-      // const aiResponseMessage = {
-      //   // text: responseText,
-      //   text: data.answer,
-      //   author: {
-      //     email: "https://api.openai.com",
-      //     avatar: "https://links.papareact.com/89k",
-      //     name: "ChatGPT",
-      //   },
-      // };
-      // await createMessageMutation(aiResponseMessage);
+      const aiResponseMessage = {
+        text: responseText,
+        author: {
+          email: "https://api.openai.com",
+          avatar: "https://links.papareact.com/89k",
+          name: "ChatGPT",
+        },
+      };
+      await createMessageMutation(aiResponseMessage);
     } catch (err) {
       console.log(err);
       toast.error("AI has failed to respond!", {

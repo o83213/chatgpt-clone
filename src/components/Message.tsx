@@ -12,7 +12,7 @@ function Message({ message }: Props) {
           alt=""
           className="h-8 w-8 rounded-full"
         />
-        <p className="pt-1 text-sm">{message.text}</p>
+        <p className="pt-1 text-sm whitespace-pre-wrap">{message.text}</p>
       </div>
     </div>
   );
