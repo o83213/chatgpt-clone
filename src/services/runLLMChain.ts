@@ -1,9 +1,15 @@
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { HumanMessage } from "langchain/schema";
+import { AIMessage, HumanMessage } from "langchain/schema";
+import { OpenAI } from "langchain/llms/openai";
+import { BufferMemory, ChatMessageHistory } from "langchain/memory";
+import { ConversationChain } from "langchain/chains";
 
-export async function runLLMChain(prompt: string, openAiModel: string) {
+export async function runLLMChain(
+  prompt: string,
+  openAiModel: string,
+  chat: Chat
+) {
   const encoder = new TextEncoder();
-
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
 
@@ -12,6 +18,8 @@ export async function runLLMChain(prompt: string, openAiModel: string) {
     modelName: openAiModel,
     streaming: true,
     openAIApiKey: process.env.OPENAI_KEY,
+    timeout: 20000,
+    maxTokens: 400,
     callbacks: [
       {
         async handleLLMNewToken(token) {
@@ -26,7 +34,19 @@ export async function runLLMChain(prompt: string, openAiModel: string) {
     ],
   });
 
-  model.call([new HumanMessage(prompt)]);
+  const { messages } = chat;
+
+  const pastMessages = messages
+    .map((message) => {
+      if (message.author.name === "ChatGPT") {
+        return new AIMessage(message.text);
+      } else {
+        return new HumanMessage(message.text);
+      }
+    })
+    .slice(-10);
+
+  model.call([...pastMessages, new HumanMessage(prompt)]);
 
   return stream.readable;
 }

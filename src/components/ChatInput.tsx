@@ -5,18 +5,19 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import ModelSelection from "./ModelSelection";
 import useSWR from "swr";
-import axios from "axios";
 
 type Props = {
   chatId: string;
   createMessageMutation: (message: Message) => Promise<void>;
   setStreamedAnswer: Dispatch<SetStateAction<string>>;
+  chat?: Chat;
 };
 
 function ChatInput({
   chatId,
   createMessageMutation,
   setStreamedAnswer,
+  chat,
 }: Props) {
   const [prompt, setPrompt] = useState<string>("");
   const { data: session } = useSession();
@@ -43,26 +44,28 @@ function ChatInput({
     };
     const notification = toast.loading("AI is thinking...");
     try {
-      await createMessageMutation(userMessage);
-
-      const response = await fetch("/api/askQuestion", {
-        method: "POST",
-        body: JSON.stringify({
-          prompt: input,
-          openAiModel: model,
+      setStreamedAnswer("");
+      const [_, aiResponse] = await Promise.all([
+        createMessageMutation(userMessage),
+        fetch("/api/askQuestion", {
+          method: "POST",
+          body: JSON.stringify({
+            prompt: input,
+            openAiModel: model,
+            chat,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      ]);
 
       toast.success("AI has responded!", { id: notification });
-
-      const reader = response.body!.getReader();
+      // start from here
+      const reader = aiResponse.body!.getReader();
       let responseText = "";
       while (true) {
         const { done, value } = await reader.read();
-
         if (done) {
           break;
         }
@@ -73,6 +76,7 @@ function ChatInput({
           return prevData + text;
         });
       }
+
       const aiResponseMessage = {
         text: responseText,
         author: {
@@ -82,7 +86,6 @@ function ChatInput({
         },
       };
       await createMessageMutation(aiResponseMessage);
-      setStreamedAnswer("");
     } catch (err) {
       console.log(err);
       toast.error("AI has failed to respond!", {

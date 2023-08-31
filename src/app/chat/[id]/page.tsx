@@ -27,6 +27,7 @@ function ChatPage({ params: { id } }: Props) {
   async function createMessageMutation(message: Message) {
     try {
       await updateChatMessageById({ chatId: id, message });
+      setStreamedAnswer("");
       mutate();
     } catch (err) {
       console.log(err);
@@ -40,6 +41,7 @@ function ChatPage({ params: { id } }: Props) {
         chatId={id}
         createMessageMutation={createMessageMutation}
         setStreamedAnswer={setStreamedAnswer}
+        chat={chat}
       />
     </div>
   );
